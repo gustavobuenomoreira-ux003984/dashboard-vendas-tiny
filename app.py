@@ -138,6 +138,8 @@ def obter_conexao():
 
 
 conexao = obter_conexao()
+if getattr(conexao, "aviso", ""):
+    st.sidebar.warning("⚠️ " + conexao.aviso)
 
 
 def primeiro_e_ultimo_dia(ano: int, mes: int) -> Tuple[date, date]:

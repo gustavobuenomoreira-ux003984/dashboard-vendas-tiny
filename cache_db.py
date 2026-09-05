@@ -64,15 +64,29 @@ ESQUEMA = [
 class Conexao:
     """Camada fininha por cima do banco, para o app nao se preocupar com qual e."""
 
-    def __init__(self, url: str = ""):
-        self.postgres = bool(url)
-        if self.postgres:
-            import psycopg2  # importado so quando realmente for usado
+    def __init__(self, url: str = "", timeout: int = 5):
+        self.postgres = False
+        self.aviso = ""  # mensagem para a tela, quando o Postgres nao responde
 
-            self.raw = psycopg2.connect(url)
-        else:
+        if url:
+            try:
+                import psycopg2  # importado so quando realmente for usado
+
+                # connect_timeout evita o app ficar travado para sempre se a
+                # porta 5432 estiver bloqueada ou o banco fora do ar.
+                self.raw = psycopg2.connect(url, connect_timeout=timeout)
+                self.postgres = True
+            except Exception as erro:
+                self.aviso = (
+                    "Não consegui conectar no banco Postgres "
+                    f"({type(erro).__name__}: {str(erro).strip()[:160]}). "
+                    "O app está usando o cache local, que se perde quando o servidor reinicia."
+                )
+
+        if not self.postgres:
             os.makedirs(os.path.dirname(CAMINHO_SQLITE), exist_ok=True)
             self.raw = sqlite3.connect(CAMINHO_SQLITE, check_same_thread=False)
+
         self._criar_tabelas()
 
     # -- infraestrutura -----------------------------------------------------
