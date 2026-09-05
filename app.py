@@ -133,7 +133,8 @@ if SENHA_APP and not st.session_state.get("autenticado", False):
 # --------------------------------------------------------------------------
 @st.cache_resource
 def obter_conexao():
-    return cache_db.conectar()
+    """Postgres (Neon) quando DATABASE_URL existe; senao SQLite local."""
+    return cache_db.conectar(segredo("DATABASE_URL"))
 
 
 conexao = obter_conexao()
@@ -271,7 +272,7 @@ def sincronizar(data_inicial: date, data_final: date, forcar: bool) -> None:
 st.sidebar.title("⚙️ Filtros")
 
 if TOKEN:
-    st.sidebar.caption(f"🔑 Token carregado do .env (final: …{TOKEN[-4:]})")
+    st.sidebar.caption(f"🔑 Token carregado (final: …{TOKEN[-4:]})")
 else:
     st.sidebar.error(
         "Token não configurado. Abra o arquivo `.env` na pasta do projeto e coloque o seu "
@@ -351,6 +352,7 @@ coluna_valor = "total_pedido" if base_valor.startswith("Total") else "total_prod
 
 with st.sidebar.expander("🗄️ Cache local"):
     resumo = cache_db.resumo_cache(conexao)
+    st.write(f"Guardado em: **{resumo.get('onde', 'SQLite local')}**")
     st.write(f"Pedidos guardados: **{resumo['total']}**")
     if resumo["primeira"]:
         st.write(f"De {resumo['primeira']} até {resumo['ultima']}")
