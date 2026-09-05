@@ -1,0 +1,11 @@
+[server]
+headless = false
+port = 8501
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "light"
+primaryColor = "#2563eb"
+font = "sans serif"

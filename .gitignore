@@ -1,0 +1,20 @@
+# segredos
+.env
+.streamlit/secrets.toml
+
+# ambiente virtual
+.venv/
+venv/
+
+# cache de dados baixados do Tiny
+dados/
+
+# python
+__pycache__/
+*.py[cod]
+
+# mac
+.DS_Store
+
+# secrets preenchidos (o modelo secrets.toml.example pode ir para o Git)
+secrets.toml
