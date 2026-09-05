@@ -10,7 +10,7 @@ cache local e calcula as métricas de venda — geral e por vendedora.
 Abra o Terminal, entre na pasta do projeto e rode:
 
 ```bash
-cd "/Users/gugabueno/Documents/Códigos Cloud/Vídeos/dashboard-tiny" && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+cd "$HOME/Documents/Códigos Cloud/Vídeos/dashboard-tiny" && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 ```
 
 Isso cria um ambiente isolado (`.venv`) e instala streamlit, pandas, requests e python-dotenv.
@@ -21,7 +21,7 @@ Isso cria um ambiente isolado (`.venv`) e instala streamlit, pandas, requests e 
 2. Na pasta do projeto, faça uma cópia do arquivo `.env.example` com o nome `.env`:
 
 ```bash
-cd "/Users/gugabueno/Documents/Códigos Cloud/Vídeos/dashboard-tiny" && cp .env.example .env
+cd "$HOME/Documents/Códigos Cloud/Vídeos/dashboard-tiny" && cp .env.example .env
 ```
 
 3. Abra o arquivo `.env` (pode ser no TextEdit) e troque `cole_aqui_o_seu_token` pelo token real:
@@ -37,7 +37,7 @@ O `.env` fica só no seu computador — ele está no `.gitignore` e nunca é env
 ## 3. Rodar o dashboard
 
 ```bash
-cd "/Users/gugabueno/Documents/Códigos Cloud/Vídeos/dashboard-tiny" && .venv/bin/streamlit run app.py
+cd "$HOME/Documents/Códigos Cloud/Vídeos/dashboard-tiny" && .venv/bin/streamlit run app.py
 ```
 
 O navegador abre sozinho em `http://localhost:8501`.
