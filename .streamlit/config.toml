@@ -1,6 +1,5 @@
-[server]
-headless = false
-port = 8501
+# Aparencia do app. Nao coloque [server] aqui: na Streamlit Cloud a porta
+# e definida pela plataforma e um valor fixo atrapalharia a publicacao.
 
 [browser]
 gatherUsageStats = false
