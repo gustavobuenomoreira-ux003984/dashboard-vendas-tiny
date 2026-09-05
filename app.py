@@ -132,12 +132,16 @@ if SENHA_APP and not st.session_state.get("autenticado", False):
 # Recursos
 # --------------------------------------------------------------------------
 @st.cache_resource
-def obter_conexao():
-    """Postgres (Neon) quando DATABASE_URL existe; senao SQLite local."""
-    return cache_db.conectar(segredo("DATABASE_URL"))
+def obter_conexao(url: str):
+    """Postgres (Neon) quando DATABASE_URL existe; senao SQLite local.
+
+    A url entra como parametro de proposito: assim, se a configuracao mudar,
+    o Streamlit cria uma conexao nova em vez de reaproveitar a antiga.
+    """
+    return cache_db.conectar(url)
 
 
-conexao = obter_conexao()
+conexao = obter_conexao(segredo("DATABASE_URL"))
 if getattr(conexao, "aviso", ""):
     st.sidebar.warning("⚠️ " + conexao.aviso)
 
