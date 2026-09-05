@@ -18,3 +18,6 @@ __pycache__/
 
 # secrets preenchidos (o modelo secrets.toml.example pode ir para o Git)
 secrets.toml
+
+# arquivo de apoio com os segredos em texto (nunca versionar)
+SEGREDOS-PARA-COLAR.txt
