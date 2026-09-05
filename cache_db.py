@@ -67,6 +67,7 @@ class Conexao:
     def __init__(self, url: str = "", timeout: int = 5):
         self.postgres = False
         self.aviso = ""  # mensagem para a tela, quando o Postgres nao responde
+        self.url_configurada = bool(url)
 
         if url:
             try:
@@ -118,7 +119,11 @@ class Conexao:
 
     @property
     def descricao(self) -> str:
-        return "PostgreSQL (Neon)" if self.postgres else "SQLite local"
+        if self.postgres:
+            return "PostgreSQL (Neon)"
+        if not self.url_configurada:
+            return "SQLite local — DATABASE_URL não configurada nos Secrets"
+        return "SQLite local — a conexão com o Postgres falhou"
 
 
 def conectar(url: str = "") -> Conexao:
