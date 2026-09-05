@@ -159,9 +159,14 @@ def main():
     ja_tem = neon.ids_existentes()
     print(f"Neon ja possui {len(ja_tem)} pedidos. Carregando {inicio} ate {fim}.\n", flush=True)
 
-    cliente = TinyClient(os.getenv("TINY_TOKEN"), pausa=0.35)
+    # Pausa entre chamadas. Acima de ~60/min o Tiny bloqueia e a espera de 60s
+    # sai mais cara do que ir devagar. Pode ser passada como 3o argumento.
+    pausa = float(sys.argv[3]) if len(sys.argv) > 3 else 0.75
+    print(f"Pausa entre chamadas: {pausa}s (~{60/(pausa+0.4):.0f} pedidos/min)\n", flush=True)
+    cliente = TinyClient(os.getenv("TINY_TOKEN"), pausa=pausa)
     inicio_geral = time.time()
     gravados_total = 0
+    meses_com_falha = []
 
     for ano, mes in meses_entre(inicio, fim):
         d1 = date(ano, mes, 1)
@@ -169,10 +174,25 @@ def main():
         if d1 > date.today():
             continue
 
-        try:
-            resumos = cliente.pesquisar_pedidos(d1, d2)
-        except TinyAPIError as erro:
-            print(f"{ano}-{mes:02d}: erro na pesquisa -> {erro.mensagem[:90]}", flush=True)
+        # A busca do mes tambem pode bater no limite da API. Se desistirmos
+        # aqui, o mes inteiro fica faltando sem ninguem perceber - entao
+        # insistimos, e o que nao der guardamos para avisar no final.
+        resumos = None
+        for tentativa in range(1, 6):
+            try:
+                resumos = cliente.pesquisar_pedidos(d1, d2)
+                break
+            except TinyRateLimitError:
+                espera = 60 * tentativa
+                print(f"{ano}-{mes:02d}: limite na busca; aguardando {espera}s "
+                      f"(tentativa {tentativa} de 5)", flush=True)
+                time.sleep(espera)
+            except TinyAPIError as erro:
+                print(f"{ano}-{mes:02d}: erro na pesquisa -> {erro.mensagem[:90]}", flush=True)
+                break
+        if resumos is None:
+            meses_com_falha.append(f"{ano}-{mes:02d}")
+            print(f"{ano}-{mes:02d}: NAO FOI POSSIVEL BUSCAR - ficara faltando", flush=True)
             continue
 
         pendentes = [
@@ -234,6 +254,10 @@ def main():
 
     total = neon.executar("SELECT COUNT(*) FROM pedidos")[0][0]
     itens = neon.executar("SELECT COUNT(*) FROM itens")[0][0]
+    if meses_com_falha:
+        print(f"\nATENCAO: estes meses nao puderam ser buscados e ficaram "
+              f"faltando: {', '.join(meses_com_falha)}", flush=True)
+        print("Rode o script de novo para completar.", flush=True)
     print(f"\nFIM. Neon tem {total} pedidos e {itens} itens. "
           f"Tempo total: {(time.time()-inicio_geral)/60:.0f} minutos.", flush=True)
 
