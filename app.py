@@ -161,15 +161,23 @@ def opcoes_de_mes() -> List[Tuple[int, int]]:
         if mes == 0:
             mes, ano = 12, ano - 1
 
+    # Alem dos meses recentes, oferecemos todos os meses que existem no banco.
+    # Sem isso, um historico mais antigo que 18 meses ficaria inacessivel.
     resumo = cache_db.resumo_cache(conexao)
-    for chave in ("primeira", "ultima"):
-        valor = resumo.get(chave)
-        if valor:
-            try:
-                d = datetime.strptime(str(valor)[:10], "%Y-%m-%d").date()
-                opcoes.add((d.year, d.month))
-            except ValueError:
-                pass
+    primeira = resumo.get("primeira")
+    ultima = resumo.get("ultima")
+    if primeira and ultima:
+        try:
+            d1 = datetime.strptime(str(primeira)[:10], "%Y-%m-%d").date()
+            d2 = datetime.strptime(str(ultima)[:10], "%Y-%m-%d").date()
+            ano, mes = d1.year, d1.month
+            while (ano, mes) <= (d2.year, d2.month):
+                opcoes.add((ano, mes))
+                mes += 1
+                if mes == 13:
+                    mes, ano = 1, ano + 1
+        except ValueError:
+            pass
     return sorted(opcoes, reverse=True)
 
 
