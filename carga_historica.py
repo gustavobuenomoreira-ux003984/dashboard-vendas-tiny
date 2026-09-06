@@ -206,7 +206,8 @@ def main():
 
         lote, itens_lote, gravados_mes = [], {}, 0
         for indice, resumo in enumerate(pendentes, start=1):
-            for tentativa in range(1, 6):
+            detalhe = None
+            for tentativa in range(1, 7):
                 try:
                     detalhe = cliente.obter_pedido(resumo["id"])
                     break
@@ -215,11 +216,20 @@ def main():
                     print(f"    limite da API atingido; aguardando {espera}s", flush=True)
                     time.sleep(espera)
                 except TinyAPIError as erro:
+                    # Queda de rede e temporaria: se desistirmos do pedido aqui,
+                    # ele fica faltando para sempre. Esperamos a rede voltar.
+                    texto = erro.mensagem.lower()
+                    transitorio = any(
+                        t in texto for t in ("conexao", "conexão", "timeout", "instavel", "instável")
+                    )
+                    if transitorio and tentativa < 6:
+                        espera = 30 * tentativa
+                        print(f"    rede indisponivel; aguardando {espera}s "
+                              f"(tentativa {tentativa} de 6)", flush=True)
+                        time.sleep(espera)
+                        continue
                     print(f"    pedido {resumo['id']} falhou: {erro.mensagem[:70]}", flush=True)
-                    detalhe = None
                     break
-            else:
-                detalhe = None
             if not detalhe:
                 continue
 
